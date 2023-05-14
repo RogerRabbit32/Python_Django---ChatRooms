@@ -1,4 +1,9 @@
 from django.shortcuts import render
+from rest_framework import generics
+from .models import ChatRoom
+from .serializers import ChatRoomSerializer
+from django.contrib.auth.models import User
+from .serializers import *
 
 
 def index(request):
@@ -7,3 +12,13 @@ def index(request):
 
 def room(request, room_name):
     return render(request, "chat/room.html", {"room_name": room_name})
+
+
+class UserListCreateView(generics.ListCreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UsersSerializer
+
+
+class ChatRoomDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ChatRoom.objects.all()
+    serializer_class = ChatRoomSerializer
