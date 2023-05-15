@@ -14,7 +14,7 @@ def room(request, room_name):
     return render(request, "chat/room.html", {"room_name": room_name})
 
 
-class UserListCreateView(generics.ListCreateAPIView):
+class UserList(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UsersSerializer
 
