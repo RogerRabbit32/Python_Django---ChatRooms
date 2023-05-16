@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Private chat</title>
+</head>
+<body>
+<h1>Private chat between {{ chat.user1 }} and {{ chat.user2 }}</h1>
+
+  <textarea id="chat-messages" readonly></textarea>
+
+  <script>
+    // Populate the chat messages in the textarea
+    var chatMessages = document.getElementById('chat-messages');
+
+    {% for message in messages %}
+      {% if message.sender == request.user %}
+        // Current user's messages on the right side
+        chatMessages.value += 'You: ' + '{{ message.text }}' + '\n';
+        chatMessages.style.textAlign = 'right';
+        chatMessages.style.direction = 'rtl';
+      {% else %}
+        // Other user's messages on the left side
+        chatMessages.value += '{{ message.sender.username }}: ' + '{{ message.text }}' + '\n';
+        chatMessages.style.textAlign = 'left';
+        chatMessages.style.direction = 'ltr';
+      {% endif %}
+    {% endfor %}
+  </script>
+</body>
+</html>
