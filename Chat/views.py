@@ -12,7 +12,7 @@ from .serializers import *
 def chat_room_detail(request, chat_id):
     chat = get_object_or_404(PrivateChat, id=chat_id)
     # Check if the current user is a participant in this private chat
-    if not chat.filter(user1=request.user.id).exists() and not chat.filter(user2=request.user.id).exists():
+    if request.user != chat.user1 and request.user != chat.user2:
         # handle the access denial
         return render(request, 'access_denied.html')
 
@@ -20,13 +20,13 @@ def chat_room_detail(request, chat_id):
     messages = Message.objects.filter(
         content_type=ContentType.objects.get_for_model(chat),
         object_id=chat.id,
-    ).order_by('-date_created')[:15]
+    ).order_by('-date_posted')[:15]
 
     context = {
         'chat': chat,
         'messages': messages,
     }
-    return render(request, 'chat_room_detail.html', context)
+    return render(request, 'chat/private_chat_detail.html', context)
 
 
 def index(request):
