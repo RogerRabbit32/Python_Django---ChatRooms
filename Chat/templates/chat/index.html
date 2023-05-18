@@ -38,20 +38,53 @@
     </script>
 
     <script>
+    const currentUserID = {{ request.user.id }};
       // Fetch all users from the API endpoint
       fetch('api/users/')
         .then(response => response.json())
         .then(data => {
           // Loop through each user and add them to the table
           data.forEach(user => {
+            // Creating the users table
+            if (user.id !== currentUserID) {
             const row = document.createElement('tr');
             const username = document.createElement('td');
             const email = document.createElement('td');
+            const button = document.createElement('button');
             username.textContent = user.username;
             email.textContent = user.email;
+            button.textContent = 'Chat';
+
+            // add button action (create or retrieve a private chat)
+            button.addEventListener('click', () => {
+                        // Call the API to start a chat with the selected user
+                        fetch('api/private_chats/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': '{{ csrf_token }}'
+                            },
+                            body: JSON.stringify({
+                                user1_id: currentUserID,
+                                user2_id: user.id,
+                            }),
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                // Redirect to the chat details page
+                                window.location.href = '/chat/private/' + data.id + '/';
+                            })
+                            .catch(error => {
+                                console.error(error);
+                            });
+                    });
+
+
             row.appendChild(username);
             row.appendChild(email);
+            row.appendChild(button);
             document.getElementById('user-list').appendChild(row);
+            }
           });
         })
         .catch(error => {

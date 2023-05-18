@@ -1,11 +1,38 @@
+from django.db.models import Q
 from django.shortcuts import render, get_object_or_404
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from rest_framework import generics
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 
 from .models import PrivateChat, ChatRoom
 from .serializers import *
+
+
+class PrivateChatView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user1_id = request.data.get('user1_id')
+        user2_id = request.data.get('user2_id')
+
+        # Check if a private chat already exists between the two users
+        existing_private_chat = PrivateChat.objects.filter(
+            (Q(user1=user1_id) & Q(user2=user2_id)) |
+            (Q(user1=user2_id) & Q(user2=user1_id))
+        ).first()
+
+        if existing_private_chat:
+            serializer = PrivateChatSerializer(existing_private_chat)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            new_chat = PrivateChat.objects.create(user1=user1_id, user2=user2_id)
+            serializer = PrivateChatSerializer(new_chat)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 @login_required
@@ -20,7 +47,7 @@ def chat_room_detail(request, chat_id):
     messages = Message.objects.filter(
         content_type=ContentType.objects.get_for_model(chat),
         object_id=chat.id,
-    ).order_by('-date_posted')[:15]
+    ).order_by('date_posted')[:15]
 
     context = {
         'chat': chat,
