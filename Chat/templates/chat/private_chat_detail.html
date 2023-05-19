@@ -10,19 +10,52 @@
   <textarea id="chat-messages" cols="100" rows="20" readonly></textarea>
 
   <script>
-    // Populate the chat messages in the textarea
-    var chatMessages = document.getElementById('chat-messages');
+    document.addEventListener('DOMContentLoaded', function() {
+      // Function to retrieve chat history
+      function getChatHistory() {
+        // Extract chat ID from the URL
+        var url = window.location.href;
+        var chatId = url.substring(url.lastIndexOf('/') + 1);
+        const currentUserID = {{ request.user.id }}
 
-    {% for message in messages %}
-      {% if message.sender == request.user %}
-        // Current user's messages on the right side
-        chatMessages.value += 'You: ' + '{{ message.text }}' + '\n' + '\n';
-      {% else %}
-        // Other user's messages on the left side
-        chatMessages.value += '{{ message.sender.username }}: ' + '{{ message.text }}' + '\n' + '\n';
-      {% endif %}
-    {% endfor %}
+        fetch('/api/private_chats/' + chatId + '/', {
+          headers: {
+                     'X-CSRFToken': '{{ csrf_token }}'
+          }
+          })
+          .then(response => response.json())
+          .then(data => {
+            var chatMessages = document.getElementById('chat-messages');
+            data.forEach(message => {
+              if(message.sender.id === currentUserID) {
+              chatMessages.value += 'You: ' + '{{ message.text }}' + '\n' + '\n';
+              }
+              else {
+              chatMessages.value += '{{ message.sender.username }}: ' + '{{ message.text }}' + '\n' + '\n';
+              }
+            });
+          })
+          .catch(error => console.log(error));
+      }
+
+      // Call the function to retrieve chat history
+      getChatHistory();
+    });
   </script>
 
 </body>
 </html>
+
+
+<!--    // Populate the chat messages in the textarea-->
+<!--    var chatMessages = document.getElementById('chat-messages');-->
+
+<!--    {% for message in messages %}-->
+<!--      {% if message.sender == request.user %}-->
+<!--        // Current user's messages on the right side-->
+<!--        chatMessages.value += 'You: ' + '{{ message.text }}' + '\n' + '\n';-->
+<!--      {% else %}-->
+<!--        // Other user's messages on the left side-->
+<!--        chatMessages.value += '{{ message.sender.username }}: ' + '{{ message.text }}' + '\n' + '\n';-->
+<!--      {% endif %}-->
+<!--    {% endfor %}-->

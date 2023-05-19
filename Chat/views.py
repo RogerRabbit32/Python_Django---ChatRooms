@@ -14,6 +14,7 @@ from .serializers import *
 
 
 class PrivateChatView(APIView):
+
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -34,26 +35,41 @@ class PrivateChatView(APIView):
             serializer = PrivateChatSerializer(new_chat)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    def get(self, request, chat_id):
+        chat = get_object_or_404(PrivateChat, id=chat_id)
+
+        if request.user != chat.user1 and request.user != chat.user2:
+            # handle the access denial
+            return render(request, 'access_denied.html')
+
+        messages = Message.objects.filter(
+            content_type=ContentType.objects.get_for_model(chat),
+            object_id=chat.id,
+        ).order_by('date_posted')[:15]
+        serializer = MessageSerializer(messages, many=True)
+
+        return Response(serializer.data)
+
 
 @login_required
 def chat_room_detail(request, chat_id):
-    chat = get_object_or_404(PrivateChat, id=chat_id)
-    # Check if the current user is a participant in this private chat
-    if request.user != chat.user1 and request.user != chat.user2:
-        # handle the access denial
-        return render(request, 'access_denied.html')
-
-    # Retrieve the last 15 messages in the chat
-    messages = Message.objects.filter(
-        content_type=ContentType.objects.get_for_model(chat),
-        object_id=chat.id,
-    ).order_by('date_posted')[:15]
-
-    context = {
-        'chat': chat,
-        'messages': messages,
-    }
-    return render(request, 'chat/private_chat_detail.html', context)
+    # chat = get_object_or_404(PrivateChat, id=chat_id)
+    # # Check if the current user is a participant in this private chat
+    # if request.user != chat.user1 and request.user != chat.user2:
+    #     # handle the access denial
+    #     return render(request, 'access_denied.html')
+    #
+    # # Retrieve the last 15 messages in the chat
+    # messages = Message.objects.filter(
+    #     content_type=ContentType.objects.get_for_model(chat),
+    #     object_id=chat.id,
+    # ).order_by('date_posted')[:15]
+    #
+    # context = {
+    #     'chat': chat,
+    #     'messages': messages,
+    # }
+    return render(request, 'chat/private_chat_detail.html')  # , context
 
 
 def index(request):

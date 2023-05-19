@@ -38,15 +38,17 @@
     </script>
 
     <script>
-    const currentUserID = {{ request.user.id }};
+      const currentUserID = {{ request.user.id }};
       // Fetch all users from the API endpoint
       fetch('api/users/')
         .then(response => response.json())
         .then(data => {
           // Loop through each user and add them to the table
           data.forEach(user => {
+            console.log(user.id, currentUserID)  // just for a check
+            console.log(user.id === currentUserID) // just for a check
             // Creating the users table
-            if (user.id !== currentUserID) {
+            if (user.id !== parseInt(currentUserID)) {
             const row = document.createElement('tr');
             const username = document.createElement('td');
             const email = document.createElement('td');
@@ -65,7 +67,7 @@
                                 'X-CSRFToken': '{{ csrf_token }}'
                             },
                             body: JSON.stringify({
-                                user1_id: currentUserID,
+                                user1_id: parseInt(currentUserID),
                                 user2_id: user.id,
                             }),
                         })
