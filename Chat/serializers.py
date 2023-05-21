@@ -16,9 +16,14 @@ class PrivateChatSerializer(serializers.ModelSerializer):
 
 
 class MessageSerializer(serializers.ModelSerializer):
+    sender_username = serializers.SerializerMethodField()
+
+    def get_sender_username(self, message):
+        return message.sender.username if message.sender else None
+
     class Meta:
         model = Message
-        fields = '__all__'
+        fields = ['id', 'text', 'sender', 'sender_username', 'date_posted']
 
 
 class ChatRoomSerializer(serializers.ModelSerializer):
