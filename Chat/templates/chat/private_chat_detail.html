@@ -30,6 +30,7 @@
           })
           .then(response => response.json())
           .then(data => {
+            chatMessages.value = ''; // Clear the existing messages before appending the new ones
             data.forEach(message => {
               if(message.sender === parseInt(currentUserID)) {
               chatMessages.value += 'You: ' + `${message.text}` + '\n' + '\n';
@@ -44,6 +45,8 @@
 
       // Call the function to retrieve chat history
       getChatHistory();
+      // Simulating real-time
+      setInterval(getChatHistory, 2000);
       //
       // Message input logic
       document.querySelector('#chat-message-input').focus();
