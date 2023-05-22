@@ -18,20 +18,22 @@ class PrivateChatView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        user1_id = request.data.get('user1_id')
-        user2_id = request.data.get('user2_id')
+        # Retrieve both the private chat users from the database
+        user1_id, user2_id = request.data.get('user1_id'), request.data.get('user2_id')
+        first_user, second_user = User.objects.get(id=user1_id), User.objects.get(id=user2_id)
 
         # Check if a private chat already exists between the two users
         existing_private_chat = PrivateChat.objects.filter(
-            (Q(user1=user1_id) & Q(user2=user2_id)) |
-            (Q(user1=user2_id) & Q(user2=user1_id))
+            (Q(user1=first_user) & Q(user2=second_user)) |
+            (Q(user1=second_user) & Q(user2=first_user))
         ).first()
 
+        # If so, return the chat data, otherwise - create the chat between them
         if existing_private_chat:
             serializer = PrivateChatSerializer(existing_private_chat)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            new_chat = PrivateChat.objects.create(user1=user1_id, user2=user2_id)
+            new_chat = PrivateChat.objects.create(user1=first_user, user2=second_user)
             serializer = PrivateChatSerializer(new_chat)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
