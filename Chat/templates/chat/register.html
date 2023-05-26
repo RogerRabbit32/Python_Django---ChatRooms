@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div class="col-md-6 offset-md-3">
+<h1>Register</h1>
+    <br>
+    <form method="post" action="{% url 'register' %}">
+        {% csrf_token %}
+        {% if form.errors %}
+			<div>
+			  Your Form Has Errors
+			  {% for field in form %}
+			  	{% if field.errors %}
+			  		{{ field.errors }}
+			  	{% endif %}
+			  {% endfor %}
+			  <button type="button"></button>
+			</div>
+		{% endif %}
+
+        {{ form.as_p }}
+
+        <button type="submit">Register</button>
+    </form>
+</div>
+</body>
+</html>

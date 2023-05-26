@@ -1,8 +1,10 @@
 from django.db.models import Q
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -10,6 +12,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
 from .models import PrivateChat, ChatRoom
+from .forms import SignUpForm
 from .serializers import *
 
 
@@ -118,3 +121,41 @@ class UserList(generics.ListAPIView):
 class ChatRoomDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = ChatRoom.objects.all()
     serializer_class = ChatRoomSerializer
+
+
+def register_user(request):
+    if request.method == 'POST':
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            form.save()
+            # Authenticate and login
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password1']
+            user = authenticate(username=username, password=password)
+            login(request, user)
+            return redirect("index")
+    else:
+        form = SignUpForm()
+        return render(request, "chat/register.html", {'form': form})
+
+
+def login_user(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            messages.success(request, 'You have been logged in!')
+            return redirect('index')
+        else:
+            messages.success(request, 'There was an error logging in, please try again')
+            return redirect('index')
+    else:
+        return render(request, 'chat/login.html')
+
+
+def logout_user(request):
+    logout(request)
+    messages.success(request, 'You have been logged out')
+    return redirect('index')
