@@ -65,7 +65,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def chat_message(self, event):
         # Send the received chat message to the client
         message = event['message']
-        await self.send(text_data=message['text'])
+        await self.send(text_data=json.dumps({"message": message}))
+        # await self.send(text_data=message['text'])
 
     @database_sync_to_async
     def get_chat(self, chat_id):
@@ -81,7 +82,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         message = Message.objects.create(
             content_object=chat,
             sender=self.scope['user'],
-            text=message_data['text']
+            text=message_data['message']
         )
         return message
 

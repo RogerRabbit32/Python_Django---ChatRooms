@@ -32,12 +32,7 @@
           .then(data => {
             chatMessages.value = ''; // Clear the existing messages before appending the new ones
             data.forEach(message => {
-              if(message.sender === parseInt(currentUserID)) {
-              chatMessages.value += 'You: ' + `${message.text}` + '\n' + '\n';
-              }
-              else {
-              chatMessages.value += `${message.sender_username}: ` + `${message.text}` + '\n' + '\n';
-              }
+               chatMessages.value += `${message.sender_username}: ` + `${message.text}` + '\n' + '\n';
             });
           })
           .catch(error => console.log(error));
@@ -66,7 +61,7 @@
 
         chatSocket.onmessage = function(e) {
             const data = JSON.parse(e.data);
-            console.log(data);
+            document.querySelector('#chat-messages').value += `${data.message.sender_username}: ` + data.message.text + '\n' + '\n';
         };
 
         chatSocket.onclose = function(e) {
@@ -84,12 +79,13 @@
             const messageInputDom = document.querySelector('#chat-message-input');
             const message = messageInputDom.value;
             chatSocket.send(JSON.stringify({
-                'text': message
+                'message': message
             }));
             messageInputDom.value = '';
         };
 
-<!--        document.querySelector('#chat-message-submit').onclick = function(e) {-->
+<!--        Old API logic:-->
+<!--          document.querySelector('#chat-message-submit').onclick = function(e) {-->
 <!--            const messageInputDom = document.querySelector('#chat-message-input');-->
 <!--            const message = messageInputDom.value;-->
 <!--            var url = window.location.href;-->
