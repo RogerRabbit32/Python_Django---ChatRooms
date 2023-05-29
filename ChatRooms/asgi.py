@@ -18,13 +18,13 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ChatRooms.settings")
 # is populated before importing code that may import ORM models.
 django_asgi_app = get_asgi_application()
 
-import Chat.routing
+import chat.routing
 
 application = ProtocolTypeRouter(
     {
         "http": django_asgi_app,
         "websocket": AllowedHostsOriginValidator(
-            AuthMiddlewareStack(URLRouter(Chat.routing.websocket_urlpatterns))
+            AuthMiddlewareStack(URLRouter(chat.routing.websocket_urlpatterns))
         ),
     }
 )
