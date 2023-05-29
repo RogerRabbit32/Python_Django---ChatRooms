@@ -23,7 +23,7 @@
         const currentUserID = {{ request.user.id }}
         var chatMessages = document.getElementById('chat-messages');
 
-        fetch('http://127.0.0.1:8000/chat/api/private_chats/' + chatId + '/', {
+        fetch('http://127.0.0.1:8000/api/private_chats/' + chatId + '/', {
           headers: {
                      'X-CSRFToken': '{{ csrf_token }}'
           }

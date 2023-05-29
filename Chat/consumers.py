@@ -2,7 +2,7 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from .models import PrivateChat, Message
-from .serializers import MessageSerializer
+from ChatRooms.api.serializers import MessageSerializer
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
