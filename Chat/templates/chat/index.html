@@ -58,7 +58,7 @@
     <script>
       const currentUserID = {{ request.user.id }};
       // Fetch all users from the API endpoint
-      fetch('api/users/')
+      fetch('http://127.0.0.1:8000/api/users/')
         .then(response => response.json())
         .then(data => {
           // Loop through each user and add them to the table
@@ -78,7 +78,7 @@
             // add button action (create or retrieve a private chat)
             button.addEventListener('click', () => {
                         // Call the API to start a chat with the selected user
-                        fetch('api/private_chats/', {
+                        fetch('http://127.0.0.1:8000/api/private_chats/', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',

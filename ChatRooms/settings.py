@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     "daphne",
+    "api",
     "Chat",
     'django.contrib.admin',
     'django.contrib.auth',
