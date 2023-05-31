@@ -19,6 +19,12 @@ class ChatRoom(models.Model):
     chat_users = models.ManyToManyField(User, related_name='chat_users')
     date_created = models.DateTimeField(auto_now_add=True)
 
+    def add_participant(self, user):
+        self.chat_users.add(user)
+
+    def __str__(self):
+        return f'{self.title} by {self.owner}'
+
 
 class Message(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
