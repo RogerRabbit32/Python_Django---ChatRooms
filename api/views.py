@@ -88,6 +88,24 @@ class MessageAPIView(APIView):
         return Response(serializer.data)
 
 
+class ChatRequestCreateView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = ChatRequestSerializer(data=request.data)
+        if serializer.is_valid():
+            chat = serializer.validated_data['chat']
+            user = serializer.validated_data['sender']
+            # Check if the user has already sent a request for the chat
+            if ChatRequest.objects.filter(chat=chat, sender=user).exists():
+                return Response({'detail': 'You have already sent a request to join this chat.'},
+                                status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class UserList(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UsersSerializer

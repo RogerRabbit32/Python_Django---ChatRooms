@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from Chat.models import PrivateChat, ChatRoom, Message
+from Chat.models import PrivateChat, ChatRoom, ChatRequest, Message
 
 
 class UsersSerializer(serializers.ModelSerializer):
@@ -29,4 +29,10 @@ class MessageSerializer(serializers.ModelSerializer):
 class ChatRoomSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChatRoom
+        fields = '__all__'
+
+
+class ChatRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ChatRequest
         fields = '__all__'

@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
-from .models import PrivateChat
+from .models import PrivateChat, ChatRoom
 from .forms import SignUpForm
 from api.serializers import *
 
@@ -23,7 +23,8 @@ def chat_room_detail(request, chat_id):
 
 
 def index(request):
-    return render(request, "chat/index.html")
+    chat_rooms = ChatRoom.objects.all()
+    return render(request, "chat/index.html", {'public_chats': chat_rooms})
 
 
 def room(request, room_name):

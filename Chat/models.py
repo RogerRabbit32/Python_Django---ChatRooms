@@ -34,3 +34,19 @@ class Message(models.Model):
     sender = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     date_posted = models.DateTimeField(auto_now_add=True)
     text = models.TextField()
+
+
+class ChatRequest(models.Model):
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_requests')
+    chat = models.ForeignKey(ChatRoom, on_delete=models.CASCADE, related_name='requests')
+    message = models.CharField(max_length=200, blank=True, null=True, default=None)
+    is_accepted = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Request from {self.sender.username} for {self.chat.title}"
+
+    def approve_request(self):
+        if not self.is_accepted:
+            self.chat.chat_users.add(self.sender)
+            self.is_accepted = True
+            self.save()
