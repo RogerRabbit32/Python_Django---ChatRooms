@@ -1,9 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
 
-from .models import PrivateChat, ChatRoom
+from .models import PrivateChat, ChatRoom, ChatRequest
 from .forms import SignUpForm
 from api.serializers import *
 
@@ -24,7 +23,16 @@ def chat_room_detail(request, chat_id):
 
 def index(request):
     chat_rooms = ChatRoom.objects.all()
-    return render(request, "chat/index.html", {'public_chats': chat_rooms})
+    user = request.user
+    if user.is_authenticated:
+        sent_requests = ChatRequest.objects.filter(sender=user)
+        sent_requests_chat_ids = [request.chat.id for request in sent_requests]
+    else:
+        sent_requests_chat_ids = []
+    return render(request, "chat/index.html", {
+        'public_chats': chat_rooms,
+        'sent_request_chat_ids': sent_requests_chat_ids,
+    })
 
 
 def room(request, room_name):
@@ -54,10 +62,8 @@ def login_user(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            messages.success(request, 'You have been logged in!')
             return redirect('index')
         else:
-            messages.success(request, 'There was an error logging in, please try again')
             return redirect('index')
     else:
         return render(request, 'chat/login.html')
@@ -65,5 +71,11 @@ def login_user(request):
 
 def logout_user(request):
     logout(request)
-    messages.success(request, 'You have been logged out')
     return redirect('index')
+
+
+@login_required
+def profile(request):
+    user = request.user
+    approval_requests = ChatRequest.objects.filter(chat__owner=user, is_accepted=False)
+    return render(request, "chat/profile.html", {'user': user, 'approval_requests': approval_requests})

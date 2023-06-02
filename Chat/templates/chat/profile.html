@@ -1,0 +1,85 @@
+<h1>{{ user.username }}'s Profile</h1>
+
+<h2>Approval Requests</h2>
+<ul>
+  {% for request in approval_requests %}
+    <li data-request-id="{{ request.id }}">
+      <strong>{{ request.sender.username }}</strong> wants to join "{{ request.chat.title }}"
+      <button class="approve-request-btn" data-request-id="{{ request.id }}">Approve</button>
+    </li>
+  {% endfor %}
+</ul>
+
+<br/><br/>
+<h2>New chat room</h2>
+<button id="create-public-chat-btn">Create new channel</button>
+
+<br/><br/>
+<a href=".."><button>Back</button></a>
+
+<script>
+  // Function to handle the approval request
+  function approveRequest(requestId) {
+    fetch(`/api/chat_rooms/requests/${requestId}/approve/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token }}',
+      },
+    })
+      .then(response => {
+        if (response.ok) {
+          // If the request was successful, remove the request from the list
+          const listItem = document.querySelector(`li[data-request-id="${requestId}"]`);
+          if (listItem) {
+            listItem.remove();
+          }
+        } else {
+          console.error('Error approving request:', response.statusText);
+        }
+      })
+      .catch(error => {
+        console.error('Error approving request:', error);
+      });
+  }
+
+  // Event listener for the request approval button
+  const approveButtons = document.querySelectorAll('.approve-request-btn');
+  approveButtons.forEach(button => {
+    button.addEventListener('click', event => {
+      const requestId = event.target.getAttribute('data-request-id');
+      approveRequest(requestId);
+    });
+  });
+</script>
+
+<script>
+  // Function to create new chat room
+  function createPublicChat() {
+    const title = prompt('Enter the chat room title:');
+    if (title) {
+      fetch('/api/chat_rooms/create/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}', // Include the CSRF token
+        },
+        body: JSON.stringify({title: title}),
+      })
+        .then(response => {
+          if (response.ok) {
+            // If the chat was successfully created, redirect to the chat page or perform any desired action
+            window.location.href = '/chat/';
+          } else {
+            console.error('Error creating public chat:', response.statusText);
+          }
+        })
+        .catch(error => {
+          console.error('Error creating public chat:', error);
+        });
+    }
+  }
+
+  const createPublicChatBtn = document.getElementById('create-public-chat-btn');
+  createPublicChatBtn.addEventListener('click', createPublicChat);
+</script>

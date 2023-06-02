@@ -8,8 +8,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
-from Chat.models import PrivateChat, ChatRoom
-from Chat.forms import SignUpForm
+from Chat.models import PrivateChat, ChatRoom, ChatRequest
 from .serializers import *
 
 
@@ -97,6 +96,10 @@ class ChatRequestCreateView(APIView):
         if serializer.is_valid():
             chat = serializer.validated_data['chat']
             user = serializer.validated_data['sender']
+            # Check if the chat owner is sending the request to join
+            if chat.owner == user:
+                return Response({'detail': 'You are the owner of this chat.'},
+                                status=status.HTTP_400_BAD_REQUEST)
             # Check if the user has already sent a request for the chat
             if ChatRequest.objects.filter(chat=chat, sender=user).exists():
                 return Response({'detail': 'You have already sent a request to join this chat.'},
@@ -106,11 +109,41 @@ class ChatRequestCreateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class ChatRequestApprovalView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, request_id):
+        try:
+            chat_request = ChatRequest.objects.get(id=request_id)
+        except ChatRequest.DoesNotExist:
+            return Response({'detail': 'A chat participation request with this id does not exist'},
+                            status=status.HTTP_404_NOT_FOUND)
+        if request.user != chat_request.chat.owner:
+            return Response({'detail': 'You can only approve requests to your own chats'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        chat_request.approve_request()
+        return Response(status=status.HTTP_200_OK)
+
+
+class ChatRoomCreateView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = ChatRoomSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(owner=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class UserList(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UsersSerializer
 
 
-class ChatRoomDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = ChatRoom.objects.all()
-    serializer_class = ChatRoomSerializer
+# class ChatRoomDetailView(generics.RetrieveUpdateDestroyAPIView):
+#     queryset = ChatRoom.objects.all()
+#     serializer_class = ChatRoomSerializer
+

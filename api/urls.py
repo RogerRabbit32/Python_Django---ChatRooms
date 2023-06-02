@@ -1,6 +1,7 @@
 from django.urls import path
 
-from .views import UserList, PrivateChatView, MessageAPIView, ChatRequestCreateView
+from .views import UserList, PrivateChatView, MessageAPIView, ChatRequestCreateView, ChatRequestApprovalView, \
+ChatRoomCreateView
 
 
 urlpatterns = [
@@ -10,4 +11,6 @@ urlpatterns = [
     path('messages/', MessageAPIView.as_view(), name='all-messages'),
     path('messages/<int:chat_id>/', MessageAPIView.as_view(), name='chat-messages'),
     path('chat_rooms/requests/create/', ChatRequestCreateView.as_view(), name='chat-request'),
+    path('chat_rooms/requests/<int:request_id>/approve/', ChatRequestApprovalView.as_view(), name='request-approval'),
+    path('chat_rooms/create/', ChatRoomCreateView.as_view(), name='chat-room-create'),
 ]

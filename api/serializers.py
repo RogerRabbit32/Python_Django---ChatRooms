@@ -29,7 +29,8 @@ class MessageSerializer(serializers.ModelSerializer):
 class ChatRoomSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChatRoom
-        fields = '__all__'
+        fields = ['title', 'date_created']
+        read_only_fields = ['id', 'owner', 'chat_users']
 
 
 class ChatRequestSerializer(serializers.ModelSerializer):
