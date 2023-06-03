@@ -126,7 +126,7 @@ class ChatRequestApprovalView(APIView):
         return Response(status=status.HTTP_200_OK)
 
 
-class ChatRoomCreateView(APIView):
+class ChatRoomView(APIView):
 
     permission_classes = [IsAuthenticated]
 
@@ -135,6 +135,34 @@ class ChatRoomCreateView(APIView):
         if serializer.is_valid():
             serializer.save(owner=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request, chat_id):
+        chat = get_object_or_404(ChatRoom, id=chat_id)
+        # Check if the current user is a participant in this chat
+        if request.user != chat.owner and not chat.chat_users.filter(id=request.user.id).exists():
+            # handle the access denial
+            return render(request, 'access_denied.html')
+
+        messages = Message.objects.filter(
+            content_type=ContentType.objects.get_for_model(chat),
+            object_id=chat.id,
+        ).order_by('date_posted')[:15]
+        serializer = MessageSerializer(messages, many=True)
+
+        return Response(serializer.data)
+
+    def patch(self, request, chat_id):
+        chat = get_object_or_404(ChatRoom, id=chat_id)
+        # Check if the current user is the owner of the chat room
+        if request.user != chat.owner:
+            return Response({'detail': 'You are not the owner of this chat room.'},
+                            status=status.HTTP_403_FORBIDDEN)
+
+        serializer = ChatRoomSerializer(chat, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

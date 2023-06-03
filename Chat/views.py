@@ -13,12 +13,26 @@ def chat_room_detail(request, chat_id):
     # Check if the current user is a participant in this private chat
     if request.user != chat.user1 and request.user != chat.user2:
         # handle the access denial
-        return render(request, 'access_denied.html')
+        return render(request, 'chat/access_denied.html')
 
     context = {
         'chat': chat,
     }
     return render(request, 'chat/private_chat_detail.html', context)
+
+
+@login_required
+def public_chat_room_detail(request, chat_id):
+    chat = get_object_or_404(ChatRoom, id=chat_id)
+    # Check if the current user is a participant in this chat
+    if request.user != chat.owner and not chat.chat_users.filter(id=request.user.id).exists():
+        # handle the access denial
+        return render(request, 'chat/access_denied.html')
+
+    context = {
+        'chat': chat,
+    }
+    return render(request, 'chat/chat_room_detail.html', context)
 
 
 def index(request):

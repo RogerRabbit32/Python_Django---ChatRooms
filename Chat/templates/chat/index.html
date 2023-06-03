@@ -60,7 +60,7 @@
                 <button class="request-participation-btn" data-chat-id="{{ chat.id }}">Send request</button>
                 {% endif %}
             {% else %}
-              <span>You are a participant</span>
+              <a href="{% url 'public_chat_room_detail' chat.id %}"><button>Chat</button></a>
             {% endif %}
           </li>
         {% endfor %}

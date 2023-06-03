@@ -11,6 +11,9 @@
 <input id="chat-message-input" type="text" size="100"><br>
 <input id="chat-message-submit" type="button" value="Send">
 
+<br/><br/>
+<a href="{% url 'index' %}"><button>Back</button></a>
+
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       // Function to retrieve chat history
@@ -40,9 +43,6 @@
 
       // Call the function to retrieve chat history
       getChatHistory();
-      // Simulating real-time
-      // setInterval(getChatHistory, 4000);
-      //
 
       // Message input logic
 
@@ -54,7 +54,7 @@
         const chatSocket = new WebSocket(
             'ws://'
             + window.location.host
-            + '/ws/chat/'
+            + '/ws/private_chat/'
             + chatID
             + '/'
         );
@@ -83,39 +83,8 @@
             }));
             messageInputDom.value = '';
         };
-
-<!--        Old API logic:-->
-<!--          document.querySelector('#chat-message-submit').onclick = function(e) {-->
-<!--            const messageInputDom = document.querySelector('#chat-message-input');-->
-<!--            const message = messageInputDom.value;-->
-<!--            var url = window.location.href;-->
-<!--            var regex = /\/([^\/]+)\/$/;-->
-<!--            var match = regex.exec(url);-->
-<!--            var chatId = match[1];-->
-<!--            var senderId = '{{ request.user.id }}';-->
-<!--            fetch('http://127.0.0.1:8000/chat/api/messages/' + chatId + '/', {-->
-<!--                method: 'POST',-->
-<!--                headers: {-->
-<!--                  'Content-Type': 'application/json',-->
-<!--                  'X-CSRFToken': '{{ csrf_token }}'-->
-<!--                },-->
-<!--                body: JSON.stringify({text: message, sender: senderId, object_id: chatId})-->
-<!--              })-->
-<!--              .then(response => response.json())-->
-<!--              .then(data => {-->
-<!--                // Handle the successful response-->
-<!--                console.log('Message sent:', data);-->
-<!--              })-->
-<!--              .catch(error => {-->
-<!--                // Handle the error-->
-<!--                console.error('Error sending message:', error);-->
-<!--              });-->
-
-<!--            messageInputDom.value = '';-->
-<!--        };-->
-    });
+      });
   </script>
 
 </body>
 </html>
-
