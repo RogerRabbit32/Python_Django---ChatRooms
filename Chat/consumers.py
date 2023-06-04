@@ -95,7 +95,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     def get_public_chat(self, chat_id):
         try:
             chat = ChatRoom.objects.get(id=chat_id)
-            if self.scope["user"] in chat.chat_users.all():
+            if self.scope["user"] == chat.owner or self.scope["user"] in chat.chat_users.all():
                 return chat
         except ChatRoom.DoesNotExist:
             return None
@@ -110,7 +110,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         return message
 
     def parse_message(self, text_data):
-        # Parse the received message data (adjust as per your message format)
         message_data = json.loads(text_data)
         return message_data
 
