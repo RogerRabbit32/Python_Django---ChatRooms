@@ -14,4 +14,5 @@ urlpatterns = [
     path('chat_rooms/requests/<int:request_id>/approve/', ChatRequestApprovalView.as_view(), name='request-approval'),
     path('chat_rooms/create/', ChatRoomView.as_view(), name='chat-room-create'),
     path('chat_rooms/<int:chat_id>/', ChatRoomView.as_view(), name='chat_room_history'),
+    # path('profile/update/', UserProfileUpdateView.as_view(), name='profile-update'),
 ]

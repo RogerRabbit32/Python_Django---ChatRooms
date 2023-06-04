@@ -12,3 +12,4 @@ urlpatterns = [
     path('profile/', profile, name='profile'),
     path('room/<int:chat_id>/', public_chat_room_detail, name='public_chat_room_detail'),
 ]
+

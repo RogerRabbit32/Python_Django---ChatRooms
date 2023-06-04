@@ -2,6 +2,37 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+from PIL import Image
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
+    username = models.CharField(max_length=150)
+
+    def __str__(self):
+        return self.username
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        if self.avatar:
+            img = Image.open(self.avatar.path)
+
+            # Resize the image if necessary
+            max_size = (100, 100)
+            if img.width > max_size[0] or img.height > max_size[1]:
+                img.thumbnail(max_size, Image.ANTIALIAS)
+                img.save(self.avatar.path)
+
+
+@receiver(post_save, sender=User)
+def create_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
 
 
 class PrivateChat(models.Model):
@@ -50,3 +81,6 @@ class ChatRequest(models.Model):
             self.chat.chat_users.add(self.sender)
             self.is_accepted = True
             self.save()
+
+
+post_save.connect(create_profile, sender=User)

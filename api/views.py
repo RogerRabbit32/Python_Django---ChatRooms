@@ -7,6 +7,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from Chat.models import PrivateChat, ChatRoom, ChatRequest
 from .serializers import *
@@ -169,9 +170,3 @@ class ChatRoomView(APIView):
 class UserList(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UsersSerializer
-
-
-# class ChatRoomDetailView(generics.RetrieveUpdateDestroyAPIView):
-#     queryset = ChatRoom.objects.all()
-#     serializer_class = ChatRoomSerializer
-

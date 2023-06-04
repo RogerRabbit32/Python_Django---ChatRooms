@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 
 from .models import PrivateChat, ChatRoom, ChatRequest
-from .forms import SignUpForm
+from .forms import SignUpForm, ProfileForm
 from api.serializers import *
 
 
@@ -62,7 +62,8 @@ def register_user(request):
             return redirect("index")
     else:
         form = SignUpForm()
-        return render(request, "chat/register.html", {'form': form})
+
+    return render(request, "chat/register.html", {'form': form})
 
 
 def login_user(request):
@@ -88,4 +89,16 @@ def logout_user(request):
 def profile(request):
     user = request.user
     approval_requests = ChatRequest.objects.filter(chat__owner=user, is_accepted=False)
-    return render(request, "chat/profile.html", {'user': user, 'approval_requests': approval_requests})
+
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, request.FILES, instance=request.user.profile)
+        if form.is_valid():
+            profile = form.save(commit=False)
+            profile.user = user
+            profile.save()
+            # Handle the form submission success
+    else:
+        form = ProfileForm(instance=request.user.profile)
+
+    return render(request, "chat/profile.html", {'user': user, 'approval_requests': approval_requests, 'form': form})
+
